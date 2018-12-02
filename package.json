@@ -9,7 +9,7 @@
   },
   "author": "Samuel Dale",
   "license": "ISC",
-  "repository": "http://github.com/smhdale/adventofcode-2018",
+  "repository": "github:smhdale/adventofcode-2018",
   "devDependencies": {
     "coffeescript": "^2.3.2"
   }

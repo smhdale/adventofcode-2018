@@ -6,6 +6,7 @@ if [ $# -eq 0 ]; then
   exit
 fi
 
+helpers="src/helpers.coffee"
 src="src/day$1.coffee"
 dist="dist/day$1.js"
 
@@ -17,5 +18,9 @@ fi
 
 echo -e "Compiling and running \`$src\`...\n"
 
+# Compile helpers
+coffee -o 'dist/' --compile $helpers
+
+# Compile day's script
 coffee -o 'dist/' --compile $src
 node $dist

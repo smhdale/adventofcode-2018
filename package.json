@@ -1,5 +1,5 @@
 {
-  "name": "Advent of Code 2018",
+  "name": "adventofcode-2018",
   "version": "1.0.0",
   "description": "CoffeeScript solutions for 2018's Advent of Code challenges.",
   "main": "dist/day1.js",

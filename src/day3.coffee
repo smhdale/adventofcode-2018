@@ -4,7 +4,12 @@ parseRect = (line) ->
   [ , id, x, y, w, h ] = line
     .match /#(\d+) @ (\d+),(\d+): (\d+)x(\d+)/
     .map Number
-  { id, x1: x, y1: y, x2: x + w - 1, y2: y + h - 1 }
+  return
+    id: id
+    x1: x
+    y1: y
+    x2: x + w - 1
+    y2: y + h - 1
 
 getOverlap = (r1, r2) ->
   if r1.x1 > r2.x2 || r2.x1 > r1.x2 || r1.y1 > r2.y2 || r2.y1 > r1.y2 then false else

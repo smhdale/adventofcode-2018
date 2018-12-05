@@ -32,7 +32,6 @@ day5 = () -> (reduce helpers.input '5').length
 ## PART 2 SOLUTION ##
 day5_adv = () ->
   polymer = helpers.input '5'
-  shortest = polymer.length
 
   # Generate polymers assuming each unit is faulty, then find the shortest
   reduced = (reduce removeFaulty polymer, unit for unit in alphabet)

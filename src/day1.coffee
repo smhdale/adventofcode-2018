@@ -1,15 +1,16 @@
 helpers = require './helpers'
 
-day1 = () -> [...helpers.input '1', Number].reduce (a, b) -> a + b
+## PART 1 SOLUTION ##
+day1 = () -> [...helpers.inputLines '1', Number].reduce (a, b) -> a + b
 
+## PART 2 SOLUTION ##
 day1_adv = () ->
   freq = 0
-  seen = []
-  for n from helpers.inputLoop '1', Number
+  seen = new Set()
+  for n from helpers.inputLinesLoop '1', Number
     freq += n
-    if freq in seen then return freq
-    seen.push freq
-  freq
+    if seen.has freq then return freq
+    seen.add freq
 
 console.log day1()
 console.log day1_adv()

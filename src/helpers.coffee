@@ -1,15 +1,24 @@
 fs = require 'fs'
 
+getFile = (day) -> fs.readFileSync "./input/#{day}.sdx", 'utf-8'
+
+# Input for just returning file contents
+
+input = (day, cast = String) -> getFile(day).trim()
+
+# Input for files with multiple lines
+
 getFileLines = (day) ->
-  fs.readFileSync "./input/#{day}.sdx", 'utf-8'
+  getFile day
     .split '\n'
     .map (l) -> l.trim()
     .filter Boolean
 
-input = (day, cast = String) -> yield cast line for line in getFileLines day
-inputLoop = (day, cast = String) -> yield from input day, cast while 1
+inputLines = (day, cast = String) -> yield cast line for line in getFileLines day
+inputLinesLoop = (day, cast = String) -> yield from input day, cast while 1
 
 module.exports = {
   input,
-  inputLoop
+  inputLines,
+  inputLinesLoop
 }

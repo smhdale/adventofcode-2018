@@ -1,24 +1,42 @@
 helpers = require './helpers'
 
+# Alphabet of units in the polymer
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
-regex = new RegExp ((a + (b = a.toUpperCase()) + '|' + b + a for a in alphabet).join '|'), 'g'
 
-reduce = (polymer) -> (polymer = polymer.replace regex, '' while regex.test polymer).pop()
+# Generates polymer pairs to reduce
+pairs = (c) ->
+  up = c.toUpperCase()
+  c + up + '|' + up + c
 
-day5 = () ->
-  polymer = reduce [...helpers.input '5'][0]
-  polymer.length
+# Reduces a polymer by removing matching unit pairs
+reduce = (polymer) ->
+  # Unit pair detector regex
+  regex = new RegExp (pairs c for c in alphabet).join('|'), 'g'
 
+  # Reduce the polymer while pairs exist
+  while regex.test polymer
+    polymer = polymer.replace regex, ''
+
+  # Return the final polymer
+  polymer
+
+# Removes faulty units from a polymer
+removeFaulty = (polymer, unit) ->
+  regex = new RegExp unit, 'ig'
+  polymer.replace regex, ''
+
+
+## PART 1 SOLUTION ##
+day5 = () -> (reduce helpers.input '5').length
+
+## PART 2 SOLUTION ##
 day5_adv = () ->
-  polymer = [...helpers.input '5'][0]
+  polymer = helpers.input '5'
   shortest = polymer.length
 
-  for c in alphabet
-    remover = new RegExp c, 'ig'
-    reduced = reduce polymer.replace remover, ''
-    shortest = Math.min reduced.length, shortest
-
-  shortest
+  # Generate polymers assuming each unit is faulty, then find the shortest
+  reduced = (reduce removeFaulty polymer, unit for unit in alphabet)
+  Math.min ...(poly.length for poly in reduced)
 
 console.log day5()
 console.log day5_adv()

@@ -25,9 +25,11 @@ getOverlaps = (rects) ->
       if overlap = getOverlap r1, r2 then overlaps.push overlap
   overlaps
 
+
+## PART 1 SOLUTION ##
 day3 = () ->
   # Calculate overlaps of all cuts
-  overlaps = getOverlaps [...helpers.input '3', parseRect]
+  overlaps = getOverlaps [...helpers.inputLines '3', parseRect]
 
   # Count all coordinates in all overlaps
   coords = new Set()
@@ -37,8 +39,9 @@ day3 = () ->
         coords.add "#{x},#{y}"
   coords.size
 
+## PART 2 SOLUTION ##
 day3_adv = () ->
-  rects = [...helpers.input '3', parseRect]
+  rects = [...helpers.inputLines '3', parseRect]
   overlaps = getOverlaps rects
   (rects.find (r1) -> overlaps.every (r2) -> !getOverlap r1, r2).id
 

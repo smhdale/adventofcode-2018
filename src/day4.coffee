@@ -12,7 +12,7 @@ parseLine = (line) ->
 
 parseInput = () ->
   # Get all lines, then sort by date
-  lines = [...helpers.input '4', parseLine].sort (a, b) -> a.date - b.date
+  lines = [...helpers.inputLines '4', parseLine].sort (a, b) -> a.date - b.date
 
   guards = {}
   guardId = null
@@ -38,6 +38,8 @@ parseInput = () ->
   # Return parsed guards data
   guards
 
+
+## PART 1 SOLUTION ##
 day4 = () ->
   guards = parseInput()
 
@@ -52,6 +54,7 @@ day4 = () ->
   # Return guard ID * their sleepiest minute
   sleepiestGuardId * indexOfMax guards[sleepiestGuardId].freq
 
+## PART 2 SOLUTION ##
 day4_adv = () ->
   guards = parseInput()
 

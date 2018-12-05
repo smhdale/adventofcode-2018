@@ -15,7 +15,7 @@ getFileLines = (day) ->
     .filter Boolean
 
 inputLines = (day, cast = String) -> yield cast line for line in getFileLines day
-inputLinesLoop = (day, cast = String) -> yield from input day, cast while 1
+inputLinesLoop = (day, cast = String) -> yield from inputLines day, cast while 1
 
 module.exports = {
   input,

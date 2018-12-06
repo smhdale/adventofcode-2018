@@ -7,7 +7,7 @@ day1 = () -> [...helpers.inputLines '1', Number].reduce (a, b) -> a + b
 day1_adv = () ->
   freq = 0
   seen = new Set()
-  for n from helpers.inputLinesLoop '1', Number
+  for n from helpers.inputLoop '1', Number
     freq += n
     if seen.has freq then return freq
     seen.add freq

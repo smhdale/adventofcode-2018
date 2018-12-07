@@ -19,10 +19,11 @@ day7 = () ->
 
   # Find steps with no dependencies
   steps = [ ...deps.keys() ]
-  queue = ([ ...prereqs ] for prereqs from deps.values())
-    .flat()
-    .filter (prereq) -> prereq not in steps
-  queue = [ ...new Set queue ]
+  queue = []
+  for prereqs from deps.values()
+    for prereq in [ ...prereqs ]
+      if prereq not in [ ...steps, ...queue ]
+        queue.push prereq
   order = []
 
   # Work out order of steps

@@ -28,15 +28,15 @@ sumMeta = (node) ->
     .reduce (a, b) -> a + b
 
 sumMetaAdvanced = (node) ->
-  total = 0
   if node.children.length
-    total += node.meta
+    # If node has children, sum children with indexes from node meta
+    node.meta
       .filter (n) -> n > 0 and n <= node.children.length
       .map (n) -> sumMetaAdvanced node.children[n - 1]
       .reduce (a, b) -> a + b
   else
-    total += node.meta.reduce (a, b) -> a + b
-  total
+    # Return sum of node's metadata
+    node.meta.reduce (a, b) -> a + b
 
 
 ## PART 1 SOLUTION ##
@@ -48,6 +48,7 @@ day8 = () ->
   root = parseNode data
   sumMeta root
 
+## PART 2 SOLUTION ##
 day8_adv = () ->
   data = helpers.input '8'
     .split ' '

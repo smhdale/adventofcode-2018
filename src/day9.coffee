@@ -25,7 +25,7 @@ class Game
     @current = new Marble @marble++, @current, @current.next
     @current.prev.next = @current
     @current.next.prev = @current
-  
+
   # Remove a marble and return its value
   removeMarble: () ->
     { prev, next, value } = @current
@@ -33,7 +33,7 @@ class Game
     next.prev = prev
     @current = next
     value
-  
+
   # Play one turn of the game
   playTurn: () ->
     if @marble % 23
@@ -60,7 +60,7 @@ day9 = (multiplier = 1) ->
   Math.max ...scores
 
 ## PART 2 SOLUTION ##
-day9_adv = () -> day9 100 
+day9_adv = -> day9 100
 
 console.log day9()
 console.log day9_adv()

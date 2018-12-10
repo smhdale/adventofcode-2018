@@ -40,7 +40,7 @@ sumMetaAdvanced = (node) ->
 
 
 ## PART 1 SOLUTION ##
-day8 = () ->
+day8 = ->
   data = helpers.input '8'
     .split ' '
     .map Number
@@ -49,7 +49,7 @@ day8 = () ->
   sumMeta root
 
 ## PART 2 SOLUTION ##
-day8_adv = () ->
+day8_adv = ->
   data = helpers.input '8'
     .split ' '
     .map Number

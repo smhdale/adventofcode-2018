@@ -1,10 +1,10 @@
 helpers = require './helpers'
 
 ## PART 1 SOLUTION ##
-day1 = () -> [...helpers.inputLines '1', Number].reduce (a, b) -> a + b
+day1 = -> [...helpers.inputLines '1', Number].reduce (a, b) -> a + b
 
 ## PART 2 SOLUTION ##
-day1_adv = () ->
+day1_adv = ->
   freq = 0
   seen = new Set()
   for n from helpers.inputLoop '1', Number

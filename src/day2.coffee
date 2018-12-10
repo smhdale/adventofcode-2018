@@ -1,7 +1,7 @@
 helpers = require './helpers'
 
 ## PART 1 SOLUTION ##
-day2 = () ->
+day2 = ->
   twos = 0
   threes = 0
   for id from helpers.inputLines '2'
@@ -11,7 +11,7 @@ day2 = () ->
   twos * threes
 
 ## PART 2 SOLUTION ##
-day2_adv = () ->
+day2_adv = ->
   ids = [...helpers.inputLines '2']
   for id, i in ids[..-2]
     for other in ids[i + 1..]

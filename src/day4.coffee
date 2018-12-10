@@ -10,7 +10,7 @@ parseLine = (line) ->
     text: text
     date: new Date date
 
-parseInput = () ->
+parseInput = ->
   # Get all lines, then sort by date
   lines = [...helpers.inputLines '4', parseLine].sort (a, b) -> a.date - b.date
 
@@ -40,7 +40,7 @@ parseInput = () ->
 
 
 ## PART 1 SOLUTION ##
-day4 = () ->
+day4 = ->
   guards = parseInput()
 
   # Which guard slept longest?
@@ -55,7 +55,7 @@ day4 = () ->
   sleepiestGuardId * indexOfMax guards[sleepiestGuardId].freq
 
 ## PART 2 SOLUTION ##
-day4_adv = () ->
+day4_adv = ->
   guards = parseInput()
 
   # Which minute was slept through the most by a single guard?

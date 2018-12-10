@@ -39,7 +39,7 @@ class Worker
 
 
 ## PART 1 SOLUTION ##
-day7 = () ->
+day7 = ->
   data = [ ...helpers.inputLines '7', parseLine ]
   deps = generateDependencies data
   queue = findNoDependencies data
@@ -63,7 +63,7 @@ day7 = () ->
   order.join ''
 
 ## PART 2 SOLUTION ##
-day7_adv = () ->
+day7_adv = ->
   data = [ ...helpers.inputLines '7', parseLine ]
   deps = generateDependencies data
   queue = findNoDependencies data

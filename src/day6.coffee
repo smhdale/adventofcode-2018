@@ -20,7 +20,7 @@ manhattanDist = (c1, c2) -> Math.abs(c1.x - c2.x) + Math.abs(c1.y - c2.y)
 
 
 ## PART 1 SOLUTION ##
-day6 = () ->
+day6 = ->
   coords = [ ...helpers.inputLines '6', parseCoords ]
   { x1, y1, x2, y2 } = getBounds coords
 
@@ -48,7 +48,7 @@ day6 = () ->
   Math.max ...areaSizes.filter (_, i) -> not disqualified.has i
 
 ## PART 2 SOLUTION ##
-day6_adv = () ->
+day6_adv = ->
   coords = [ ...helpers.inputLines '6', parseCoords ]
   { x1, y1, x2, y2 } = getBounds coords
 

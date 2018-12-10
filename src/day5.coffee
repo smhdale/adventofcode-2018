@@ -27,10 +27,10 @@ removeFaulty = (polymer, unit) ->
 
 
 ## PART 1 SOLUTION ##
-day5 = () -> (reduce helpers.input '5').length
+day5 = -> (reduce helpers.input '5').length
 
 ## PART 2 SOLUTION ##
-day5_adv = () ->
+day5_adv = ->
   polymer = helpers.input '5'
 
   # Generate polymers assuming each unit is faulty, then find the shortest

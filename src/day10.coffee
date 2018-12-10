@@ -25,21 +25,29 @@ getBounds = (points) ->
 ## PART 1 & 2 SOLUTION ##
 day10 = ->
   lights = [...helpers.inputLines '10', parseLine]
-  bounds = { h: Infinity }
+  smallestHeight = Infinity
   state = null
+  bounds = null
+  seconds = 0
 
-  for i in [0...100000]
-    thisState = lights.map (light) -> light.move()
-    thisBounds = getBounds thisState
-    if thisBounds.h < bounds.h
-      bounds = thisBounds
-      state = thisState
-    else if thisBounds.h > bounds.h then break
-  
+  while yes
+    seconds++
+    newState = lights.map (light) -> light.move()
+    newBounds = getBounds newState
+
+    # Find the second where the total height is smallest
+    if newBounds.h < smallestHeight
+      smallestHeight = newBounds.h
+      state = newState
+      bounds = newBounds
+    else if newBounds.h > smallestHeight
+      # Height started increasing, lights are probably spreading out
+      break
+
+  # Create a grid to display the message
   grid = (' ' for x in [0..bounds.w] for y in [0..bounds.h])
   grid[y - bounds.y][x - bounds.x] = '#' for { x, y } in state
 
-  console.log 'Seconds taken: ' + i + '\n'
-  (row.join '' for row in grid).join '\n'
+  "Time elapsed: #{seconds}s\n\n" + (row.join '' for row in grid).join '\n'
 
 console.log day10()

@@ -14,7 +14,7 @@ class Cart
   constructor: (@x, @y, @dir) ->
     @id = @getPos()
     @nextTurn = 0
-    @alive = yes
+    @active = yes
 
   move: ->
     switch @dir
@@ -30,70 +30,52 @@ class Cart
       @dir = (@dir + (@nextTurn - 1)) %% 4
       @nextTurn = (@nextTurn + 1) % 3
 
-  getPos: ->
-    "#{@x},#{@y}"
-
-  remove: ->
-    @alive = no
+  getPos: -> "#{@x},#{@y}"
+  remove: -> @active = no
 
 class Tracks
   constructor: (@tracks, @carts) ->
     @width = Math.max ...(line.length for line in @tracks)
 
-  trackAt: (x, y) ->
-    @tracks[y][x]
-
-  sortPos: ({ x, y }) ->
-    x + y * @width
-
-  activeCarts: ->
-    @carts.filter (cart) -> cart.alive
+  trackAt: (x, y) -> @tracks[y][x]
+  activeCarts: -> @carts.filter (cart) -> cart.active
+  sortPos: ({ x, y }) -> x + y * @width
 
   moveCarts: (remove = no) ->
     @carts.sort (a, b) => @sortPos(a) - @sortPos(b)
 
-    for cart, i in @carts
-      if cart.alive
-        cart.move()
-        pos = cart.getPos()
+    for cart in @activeCarts()
+      cart.move()
+      pos = cart.getPos()
 
-        # Check for collision first
-        for other in @activeCarts().filter (c) -> cart.id isnt c.id
-          if pos is other.getPos()
-            if remove
-              # Remove the carts that crashed, don't stop simulation
-              cart.remove()
-              other.remove()
-            else
-              # Stop simulation on first crash
-              return pos
+      # Check for collision first
+      for other in @activeCarts()
+        if cart.id isnt other.id and pos is other.getPos()
+          if not remove then return pos else
+            # Remove the carts that crashed, don't stop simulation
+            cart.remove()
+            other.remove()
 
-        # Handle this track
-        cart.handleTrack @trackAt cart.x, cart.y
+      # Handle next piece of track
+      cart.handleTrack @trackAt cart.x, cart.y
 
     # Stop when there's only one cart left
     cartsLeft = @activeCarts()
-    if remove and cartsLeft.length is 1 then return cartsLeft[0].getPos()
-    null
+    if remove and cartsLeft.length is 1 then cartsLeft[0].getPos() else null
 
 ## PART 1 SOLUTION ##
-day13 = (removeCarts = no) ->
+day13 = (withRemoval = no) ->
   input = [ ...helpers.inputLines '13' ]
 
   # Create carts
   carts = []
   for line, y in input
-    for track, x in line
-      if CARTS.has track
-        carts.push new Cart x, y, CARTS.get track
+    for track, x in line when CARTS.has track
+      carts.push new Cart x, y, CARTS.get track
 
   # Create and run simulation
   sim = new Tracks input, carts
-
-  collision = no
-  while not collision
-    collision = sim.moveCarts removeCarts
-
+  collision = sim.moveCarts withRemoval until collision
   collision
 
 ## PART 2 SOLUTION ##

@@ -11,7 +11,6 @@ input = (day, cast = String) -> cast getFile(day).trim()
 getFileLines = (day) ->
   getFile day
     .split '\n'
-    .map (l) -> l.trim()
     .filter Boolean
 
 inputLines = (day, cast = String) -> yield cast line for line in getFileLines day

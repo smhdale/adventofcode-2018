@@ -30,8 +30,14 @@ day14 = ->
 day14_adv = ->
   recipes = new Recipes()
   target = String NUM_RECIPES
-  recipes.next() until target is recipes.lastN target.length
-  recipes.scores.length - target.length
+  searchArea = target.length + 1
+  foundAt = -1
+
+  while foundAt < 0
+    recipes.next()
+    foundAt = recipes.lastN(searchArea).indexOf target
+
+  recipes.scores.length - searchArea + foundAt
 
 console.log day14()
-# console.log day14_adv()
+console.log day14_adv()

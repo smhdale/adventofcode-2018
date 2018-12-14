@@ -21,12 +21,14 @@ class Recipes
   lastN: (n) ->
     @scores[-n..].join ''
 
+
 ## PART 1 SOLUTION ##
 day14 = ->
   recipes = new Recipes()
   recipes.next() while recipes.scores.length < NUM_RECIPES + 10
   recipes.lastN 10
 
+## PART 2 SOLUTION ##
 day14_adv = ->
   recipes = new Recipes()
   target = String NUM_RECIPES

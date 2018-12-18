@@ -1,63 +1,58 @@
 helpers = require './helpers'
 
-TEST_DIR = '15_tests/'
-TESTS = [
-  27730
-  18740
-  28944
-]
-
 # Sorts points in "reading" order
 readingOrder = (a, b) ->
   if a.y is b.y then a.x - b.x else a.y - b.y
 
-pointCompare = (target) ->
-  str = target.toString()
-  (point) -> point.toString() is str
+distanceThenReading = (a, b) ->
+  if a.distance isnt b.distance then a.distance - b.distance else
+    readingOrder a.point, b.point
 
-# A* pathfinding
-aStarPath = (board, units, start, end, limit) ->
-  open = [ new AStarPoint start.x, start.y, null, 0 ]
-  closed = []
-  bestPath = null
+# Checks if a path can be made between two points
+inSameRegion = (game, start, end) ->
+  open = [ start ]
+  closed = new Set()
+  closed.add start.toString()
 
   while open.length
-    open.sort (a, b) -> a.f - b.f
-    parent = open.shift()
+    node = open.shift()
+    if node.is end then return yes
 
-    for child in parent.pointsAround().filter (c) -> board.isOpen c, units
-      compareFn = pointCompare child
-      heuristic = child.manhattanDistTo end
-      childPoint = new AStarPoint child.x, child.y, parent, heuristic
+    for nextNode in node.neighbours().filter (n) -> game.isOpen n
+      if not closed.has nextNode.toString()
+        open.push nextNode
+        closed.add nextNode.toString()
+  no
 
-      # Fail if path too long
-      if childPoint.length > limit then continue
-
-      # Check if path has reached target
-      if compareFn end
-        if not bestPath then bestPath = childPoint
-        else
-          isShorter = childPoint.length <= bestPath.length
-          isPreferred = readingOrder(firstMoveInPath(childPoint), firstMoveInPath(bestPath)) < 0
-          if isShorter and isPreferred
-            bestPath = childPoint
-      else
-        childF = childPoint.f()
-
-        # Check for existing nodes
-        overlaps = [ ...open, ...closed ].filter compareFn
-        if childF < Math.min ...(o.heuristic + o.length for o in overlaps)
-          open.push childPoint
-
-    closed.push parent
-
-  # if bestPath then bestPath else null
-  bestPath
-
-firstMoveInPath = (path) ->
+firstStep = (path) ->
   ref = path
   ref = ref.parent while ref.length > 1
   ref
+
+# A* pathfinding
+aStarPath = (game, start, end) ->
+  startId = start.toString()
+  startPoint = new PriorityPoint start.x, start.y, 0
+  open = [ startPoint ]
+
+  costs = new Map()
+  costs.set startId, 0
+
+  while open.length
+    open.sort (a, b) -> a.f - b.f
+    node = open.shift()
+    nodeId = node.toString()
+    if node.is end then return costs.get nodeId
+
+    for point in node.neighbours().filter (p) -> game.isOpen p
+      cost = 1 + costs.get nodeId
+      heuristic = point.manhattanDistTo end
+      nextNode = new PriorityPoint point.x, point.y, cost + heuristic
+      nextId = nextNode.toString()
+
+      if not costs.has(nextId) or cost < costs.get nextId
+        costs.set nextId, cost
+        open.push nextNode
 
 # A simple X,Y point
 class Point
@@ -67,30 +62,27 @@ class Point
     @x = point.x
     @y = point.y
 
-  pointsAround: ->
+  neighbours: ->
     for d in [[ 0, -1 ], [ -1, 0 ], [ 1, 0 ], [ 0, 1 ]]
       new Point @x + d[0], @y + d[1]
 
   manhattanDistTo: ({ x, y }) ->
     Math.abs(x - @x) + Math.abs(y - @y)
 
+  is: (other) ->
+    @toString() is other.toString()
+
   toString: ->
     "#{@x},#{@y}"
 
-class AStarPoint extends Point
-  constructor: (x, y, @parent, @heuristic = 0) ->
-    super x, y
-    @length = if @parent then @parent.length + 1 else 0
-
-  f: ->
-    @length + @heuristic
+class PriorityPoint extends Point
+  constructor: (x, y, @f) -> super x, y
 
 # A unit with attack health points, and a team
 class Unit extends Point
-  constructor: (x, y, @team) ->
+  constructor: (x, y, @team, @ap = 3) ->
     super x, y
     @hp = 200
-    @ap = 3
     @alive = yes
 
   takeDamage: (damage) ->
@@ -101,31 +93,34 @@ class Unit extends Point
     unit.takeDamage @ap
 
   findInAttackRange: (enemies) ->
-    toAttack = null
-    for point in @pointsAround()
-      enemy = enemies.find pointCompare point
-      if not toAttack or (enemy and enemy.hp < toAttack.hp)
-        toAttack = enemy
-    toAttack
+    enemies = @neighbours()
+      .map (p) -> enemies.find (e) -> e.is p
+      .filter Boolean
+      .sort (a, b) -> a.hp - b.hp
 
-  findPotentialTargets: (board, units) ->
+    if enemies.length then enemies[0] else null
+
+  findPotentialMoves: (game) ->
     # Identify targets
-    targets = units.filter ({ team }) => team isnt @team
+    targets = game.getLivingUnits().filter ({ team }) => team isnt @team
 
     # Find all potential points around all targets
     potentials = []
-    potentials.push ...unit.pointsAround() for unit in targets
+    for unit in targets
+      potentials.push ...unit.neighbours().filter (point) ->
+        game.isOpen point
 
-    # Find all non-walls and non-occupied points
-    potentials.filter (point) -> board.isOpen point, units
+    # Find points that are accessible and aren't walls or units
+    potentials.filter (point) => inSameRegion(game, @, point)
 
   # Take a turn, using game board as input
   # Returns true if the turn was successful
-  playTurn: (board, units) ->
-    started = Date.now()
+  playTurn: (game) ->
+    # started = Date.now()
+    if not @alive then return yes
 
     # Living units
-    living = units.filter ({ alive }) -> alive
+    living = game.getLivingUnits()
 
     # If there are no enemies, end turn
     enemies = living.filter ({ team }) => team isnt @team
@@ -137,62 +132,29 @@ class Unit extends Point
     # If no enemies in range, move
     if not toAttack
       # Find potential places to move towards
-      targets = @findPotentialTargets board, living
+      moves = @findPotentialMoves game
 
-      # Sort by closest Manhattan distance for speed
-      targets.sort (a, b) => @manhattanDistTo(a) - @manhattanDistTo b
+      if moves.length
+        withDistances = moves
+          .map (point) =>
+            distance = aStarPath game, @, point
+            { point, distance }
+          .sort distanceThenReading
+        target = withDistances[0]
 
-      shortestLength = Infinity
-      shortestPath = null
-      currentTarget = null
+        # Find best way to move to it
+        fromNeighbour = @neighbours()
+          .filter (point) ->
+            game.isOpen(point) and inSameRegion(game, point, target.point)
+          .find (point) ->
+            distance = aStarPath game, point, target.point
+            distance < target.distance
 
-      for target in targets
-        # Get best path to all targets
-        path = aStarPath board, living, @, target, shortestLength
-
-        # if paths
-        #   moves = (paths.map firstMoveInPath).sort readingOrder
-
-        if path
-          if path.length < shortestLength
-            shortestPath = path
-            shortestLength = path.length
-            currentTarget = target
-          else if path.length is shortestLength
-            if readingOrder(target, currentTarget) < 0
-              shortestPath = path
-              currentTarget = target
-            # Is this target closer in reading order?
-          # Is this the quickest path to any target?
-          # distToTarget = paths[0].length
-          # if distToTarget > shortestPath then continue
-
-          # Determine first move of each path
-          # firstMoves = (firstMoveInPath path for path in paths)
-
-
-          # Overwrite or add to the potential moves list
-          # if distToTarget < shortestPath
-          #   shortestPath = distToTarget
-          #   moves = firstMoves
-          # else if distToTarget is shortestPath
-          #   moves.push ...firstMoves
-
-      # if moves.length
-      #   move = moves
-      #     .sort readingOrder
-      #     .shift()
-      #   @moveTo move
-      #   toAttack = @findInAttackRange enemies
-      if shortestPath
-        @moveTo firstMoveInPath shortestPath
+        @moveTo fromNeighbour
         toAttack = @findInAttackRange enemies
 
-    # Check if we moved close enough to attack
+    # Try attacking again
     if toAttack then @attack toAttack
-
-    # Round was successful
-    # console.log 'turn took', Date.now() - started, 'ms'
     yes
 
 # Keeps track of open and wall squares
@@ -208,7 +170,7 @@ class Board
         square isnt @wall
 
   isOpen: (point, units = []) ->
-    @squares[point.y][point.x] and !units.find pointCompare point
+    @squares[point.y][point.x] and !units.find (unit) -> unit.is point
 
   print: (units) ->
     toPrint = for row in @squares
@@ -221,32 +183,42 @@ class Board
 
 # Battle simulator!
 class Game
-  constructor: (data) ->
+  constructor: (board, @elfAp) ->
     # Create board
-    @board = new Board data
+    @board = new Board board
     @round = 0
 
     # Find units on the board
     @units = []
-    for row, y in data
+    for row, y in board
       for square, x in row
         if square in [ 'E', 'G' ]
-          @units.push new Unit x, y, square
+          ap = if square is 'E' then @elfAp else 3
+          @units.push new Unit x, y, square, ap
+
+    @numElves = @countElves()
 
   # Attempts to play a full turn, returning true on success
   playTurn: ->
     # Sort units to determine turn order
     @units.sort readingOrder
-    # console.log @round + 1
 
     # Let each unit play its turn
-    for unit, i in @getLivingUnits()
-      # End turn if unit's turn failed
-      if not unit.playTurn @board, @units
-        # Combat is over
+    for unit in @units
+      if unit.alive and not unit.playTurn @
         return no
+      if @elfAp > 3 and @countElves() < @numElves
+        throw new Error 'An elf died!'
 
     ++@round
+
+  isOpen: (point) ->
+    @board.isOpen point, @getLivingUnits()
+
+  countElves: ->
+    @getLivingUnits()
+      .filter ({ team }) -> team is 'E'
+      .length
 
   getLivingUnits: ->
     @units.filter ({ alive }) -> alive
@@ -259,30 +231,32 @@ class Game
     @board.print @getLivingUnits()
     console.log ''
 
+  getOutcome: ->
+    hpLeft = @remainingHealth()
+    "Round: #{@round}, HP left: #{hpLeft}, answer: #{hpLeft * @round}"
+
+
 ## PART 1 SOLUTION ##
 day15 = ->
-  # Run tests
-  for expected, i in TESTS
-    g = new Game [ ...helpers.inputLines TEST_DIR + i ]
-    while yes
-      if not g.playTurn() then break
-    #   g.print()
-    # g.print()
-    result = g.remainingHealth() * g.round
-    passed = if result is expected then 'passed!' else 'failed.'
-    console.log "Test #{i + 1} #{passed} (returned #{result}, expected #{expected})"
-
   g = new Game [ ...helpers.inputLines '15' ]
-  g.print()
   while yes
     if not g.playTurn() then break
-    g.print()
-  g.print()
-
-  g.remainingHealth() * g.round
+  g.getOutcome()
 
 ## PART 2 SOLUTION ##
 day15_adv = ->
+  board = [ ...helpers.inputLines '15' ]
+  attackPower = 14
+  while attackPower
+    g = new Game board, attackPower
+    console.log "Giving elves #{attackPower} AP..."
+    try
+      while yes
+        if not g.playTurn() then break
+      return g.getOutcome()
+    catch err
+      console.log "#{attackPower} AP wasn't enough!"
+      attackPower++
 
-console.log day15()
+# console.log day15()
 console.log day15_adv()

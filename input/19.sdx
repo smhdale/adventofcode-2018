@@ -1,0 +1,37 @@
+#ip 2
+addi 2 16 2                             Jump to INIT
+seti 1 0 1    1 -> R1                   Set R1 and R3 to 1
+seti 1 4 3    1 -> R3
+mulr 1 3 4    R1 * R3 -> R4             LOOP: Set R4 to R1 * R3
+eqrr 4 5 4    R4 == R5 -> R4            If R4 == R5
+addr 4 2 2    R4 + R2 -> R2               Skip next instruction
+addi 2 1 2    R2 + 2 -> R2              Skip next instruction
+addr 1 0 0    R1 + R0 -> R0             Add R1 to R0
+addi 3 1 3    R3 + 1 -> R3              Increment R3
+gtrr 3 5 4    R3 > R5 -> R4             If R3 > R5
+addr 2 4 2    R2 + R4 -> R2               Skip next instruction
+seti 2 5 2    2 -> R2                   Jump to LOOP
+addi 1 1 1    R1 + 1 -> R1              Increment R1
+gtrr 1 5 4    R1 > R5 -> R4             If R1 > R5
+addr 4 2 2    R4 + R2 -> R2               Skip next instruction
+seti 1 1 2    1 -> R2                   Jump to line 1
+mulr 2 2 2
+addi 5 2 5                              INIT: generate and store a
+mulr 5 5 5                                    very large number in R5
+mulr 2 5 5
+muli 5 11 5
+addi 4 5 4
+mulr 4 2 4
+addi 4 9 4
+addr 5 4 5
+addr 2 0 2
+seti 0 0 2
+setr 2 3 4
+mulr 4 2 4
+addr 2 4 4
+mulr 2 4 4
+muli 4 14 4
+mulr 4 2 4
+addr 5 4 5
+seti 0 6 0
+seti 0 3 2    0 -> R2                   Jump to LOOP

@@ -82,9 +82,15 @@ day19_adv = ->
   { pointer, commands } = parseInput()
 
   device = new Device(pointer, commands)
+
+  # With this setting, the device calculates the factors of
+  # some large number N stored in R5
   device.set 0, 1
+
+  # Stop the device from running after executing instruction 35
   device.run 35
-  # Device stops running once we have our value in R5
+
+  # Pull N from the device and sum its factors manually
   findFactorsOf = device.get 5
   factors = (i for i in [1..findFactorsOf] when findFactorsOf % i is 0)
   factors.reduce (a, b) -> a + b

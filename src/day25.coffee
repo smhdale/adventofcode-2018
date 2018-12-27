@@ -1,5 +1,8 @@
 helpers = require './helpers'
 
+unseenCoords = (coords, seen) ->
+	coords.filter (c) -> not seen.has c.id
+
 class Coord
 	constructor: (@arr) ->
 		@id = @arr.join ','
@@ -8,32 +11,33 @@ class Coord
 	manhattanDistTo: (other) ->
 		@arr.reduce ((tot, n, i) -> tot + Math.abs n - other.arr[i]), 0
 
-coords = for line from helpers.inputLines '25b'
-	new Coord line.split(',').map Number
-
 
 ## PART 1 SOLUTION ##
 day25 = ->
-#	constellations = 0
-#	for coord, i in coords
-#		for other in coords[i + 1..]
-#			if coord.manhattanDistTo(other) <= 3
-#				constellation = coord.constellation or other.constellation or ++constellations
-#				coord.constellation = constellation
-#				other.constellation = constellation
-#	constellations
-
+	coords = for line from helpers.inputLines '25'
+		new Coord line.split(',').map Number
 	constellations = 0
 	seen = new Set()
+
 	while seen.size < coords.length
-		unseen = coords.filter (c) -> not seen.has c.id
-		next = unseen.pop()
-		next.constellation = ++constellations
-		seen.add next.id
-		for coord in unseen
-			if next.manhattanDistTo(coord) <= 3
-				coord.constellation = next.constellation
-				seen.add coord.id
+		point = unseenCoords(coords, seen).pop()
+		thisConstellation = constellations++
+		seen.add point.id
+
+		nearby = [ point ]
+		while nearby.length
+			next = nearby.pop()
+			newCoords = unseenCoords coords, seen
+				.filter (c) -> next.manhattanDistTo(c) <= 3
+
+			# Mark all newly found coords as seen
+			seen.add c.id for c in newCoords
+
+			# Add them to this constellation
+			nearby.push ...newCoords
+
+	# Return number of constellations counted
 	constellations
+
 
 console.log day25()
